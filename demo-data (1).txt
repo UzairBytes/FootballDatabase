@@ -1,0 +1,257 @@
+PART (A)
+
+phase2=# \i schema.sql
+psql:schema.sql:1: NOTICE:  drop cascades to 6 other objects
+DETAIL:  drop cascades to table country
+drop cascades to table league
+drop cascades to table player
+drop cascades to table playerattributes
+drop cascades to table team
+drop cascades to table teamattributes
+DROP SCHEMA
+CREATE SCHEMA
+SET
+CREATE TABLE
+CREATE TABLE
+CREATE TABLE
+CREATE TABLE
+CREATE TABLE
+CREATE TABLE
+CREATE TABLE
+
+-- data loaded through Python in IDE. Code has been shared in file, db.py.
+
+PART (B)
+
+phase2=# \d Country
+             Table "projectschema.country"
+   Column   |  Type   | Collation | Nullable | Default 
+------------+---------+-----------+----------+---------
+ country_id | integer |           | not null | 
+ name       | text    |           | not null | 
+Indexes:
+    "country_pkey" PRIMARY KEY, btree (country_id)
+Referenced by:
+    TABLE "league" CONSTRAINT "league_country_id_fkey" FOREIGN KEY (country_id) REFERENCES country(country_id)
+    TABLE "match" CONSTRAINT "match_country_id_fkey" FOREIGN KEY (country_id) REFERENCES country(country_id)
+
+phase2=# \d League
+             Table "projectschema.league"
+   Column   |  Type   | Collation | Nullable | Default 
+------------+---------+-----------+----------+---------
+ league_id  | integer |           | not null | 
+ country_id | integer |           |          | 
+ name       | text    |           | not null | 
+Indexes:
+    "league_pkey" PRIMARY KEY, btree (league_id)
+Foreign-key constraints:
+    "league_country_id_fkey" FOREIGN KEY (country_id) REFERENCES country(country_id)
+Referenced by:
+    TABLE "match" CONSTRAINT "match_league_id_fkey" FOREIGN KEY (league_id) REFERENCES league(league_id)
+
+                          Table "projectschema.match"
+     Column     |            Type             | Collation | Nullable | Default 
+----------------+-----------------------------+-----------+----------+---------
+ match_id       | integer                     |           | not null | 
+ country_id     | integer                     |           |          | 
+ league_id      | integer                     |           |          | 
+ season         | character varying(10)       |           | not null | 
+ date           | timestamp without time zone |           | not null | 
+ home_team_id   | integer                     |           |          | 
+ away_team_id   | integer                     |           |          | 
+ home_team_goal | integer                     |           | not null | 
+ away_team_goal | integer                     |           | not null | 
+ shot_on        | text                        |           |          | 
+ shot_off       | text                        |           |          | 
+ foul_commit    | text                        |           |          | 
+ card           | text                        |           |          | 
+ crosses        | text                        |           |          | 
+ corner         | text                        |           |          | 
+ possession     | text                        |           |          | 
+Indexes:
+    "match_pkey" PRIMARY KEY, btree (match_id)
+Foreign-key constraints:
+    "match_away_team_id_fkey" FOREIGN KEY (away_team_id) REFERENCES team(team_id)
+    "match_country_id_fkey" FOREIGN KEY (country_id) REFERENCES country(country_id)
+    "match_home_team_id_fkey" FOREIGN KEY (home_team_id) REFERENCES team(team_id)
+    "match_league_id_fkey" FOREIGN KEY (league_id) REFERENCES league(league_id)
+
+phase2=# \d Player
+                       Table "projectschema.player"
+  Column   |            Type             | Collation | Nullable | Default 
+-----------+-----------------------------+-----------+----------+---------
+ player_id | integer                     |           | not null | 
+ name      | text                        |           | not null | 
+ birthday  | timestamp without time zone |           | not null | 
+ height    | double precision            |           | not null | 
+ weight    | integer                     |           | not null | 
+Indexes:
+    "player_pkey" PRIMARY KEY, btree (player_id)
+Referenced by:
+    TABLE "playerattributes" CONSTRAINT "playerattributes_player_id_fkey" FOREIGN KEY (player_id) REFERENCES player(player_id)
+
+phase2=# \d PlayerAttributes
+                       Table "projectschema.playerattributes"
+       Column        |            Type             | Collation | Nullable | Default 
+---------------------+-----------------------------+-----------+----------+---------
+ player_id           | integer                     |           | not null | 
+ date                | timestamp without time zone |           | not null | 
+ rating              | double precision            |           | not null | 
+ potential           | double precision            |           | not null | 
+ attacking_work_rate | text                        |           |          | 
+ defensive_work_rate | text                        |           |          | 
+Indexes:
+    "playerattributes_pkey" PRIMARY KEY, btree (player_id, date)
+Check constraints:
+    "playerattributes_potential_check" CHECK (potential >= 0::double precision AND potential <= 100::double precision)
+    "playerattributes_rating_check" CHECK (rating >= 0::double precision AND rating <= 100::double precision)
+Foreign-key constraints:
+    "playerattributes_player_id_fkey" FOREIGN KEY (player_id) REFERENCES player(player_id)
+
+phase2=# \d Team
+                  Table "projectschema.team"
+      Column       |  Type   | Collation | Nullable | Default 
+-------------------+---------+-----------+----------+---------
+ team_id           | integer |           | not null | 
+ team_name         | text    |           | not null | 
+ team_abbreviation | text    |           | not null | 
+Indexes:
+    "team_pkey" PRIMARY KEY, btree (team_id)
+Referenced by:
+    TABLE "match" CONSTRAINT "match_away_team_id_fkey" FOREIGN KEY (away_team_id) REFERENCES team(team_id)
+    TABLE "match" CONSTRAINT "match_home_team_id_fkey" FOREIGN KEY (home_team_id) REFERENCES team(team_id)
+    TABLE "teamattributes" CONSTRAINT "teamattributes_team_id_fkey" FOREIGN KEY (team_id) REFERENCES team(team_id)
+
+phase2=# \d TeamAttributes
+                          Table "projectschema.teamattributes"
+          Column          |            Type             | Collation | Nullable | Default 
+--------------------------+-----------------------------+-----------+----------+---------
+ team_id                  | integer                     |           | not null | 
+ date                     | timestamp without time zone |           | not null | 
+ build_up_play_speed      | integer                     |           |          | 
+ build_up_play_dribbling  | double precision            |           |          | 
+ build_up_play_passing    | integer                     |           |          | 
+ chance_creation_passing  | integer                     |           |          | 
+ chance_creation_crossing | integer                     |           |          | 
+ chance_creation_shooting | integer                     |           |          | 
+ defence_pressure         | integer                     |           |          | 
+ defence_aggression       | integer                     |           |          | 
+ defence_team_width       | integer                     |           |          | 
+Indexes:
+    "teamattributes_pkey" PRIMARY KEY, btree (team_id, date)
+Check constraints:
+    "teamattributes_build_up_play_dribbling_check" CHECK (build_up_play_dribbling >= 0::double precision AND build_up_play_dribbling <= 100::double precision)
+    "teamattributes_build_up_play_passing_check" CHECK (build_up_play_passing >= 0 AND build_up_play_passing <= 100)
+    "teamattributes_build_up_play_speed_check" CHECK (build_up_play_speed >= 0 AND build_up_play_speed <= 100)
+    "teamattributes_chance_creation_crossing_check" CHECK (chance_creation_crossing >= 0 AND chance_creation_crossing <= 100)
+    "teamattributes_chance_creation_passing_check" CHECK (chance_creation_passing >= 0 AND chance_creation_passing <= 100)
+    "teamattributes_chance_creation_shooting_check" CHECK (chance_creation_shooting >= 0 AND chance_creation_shooting <= 100)
+    "teamattributes_defence_aggression_check" CHECK (defence_aggression >= 0 AND defence_aggression <= 100)
+    "teamattributes_defence_pressure_check" CHECK (defence_pressure >= 0 AND defence_pressure <= 100)
+    "teamattributes_defence_team_width_check" CHECK (defence_team_width >= 0 AND defence_team_width <= 100)
+Foreign-key constraints:
+    "teamattributes_team_id_fkey" FOREIGN KEY (team_id) REFERENCES team(team_id)
+
+PART (C)
+
+phase2=# select count(*) from Country;
+ count 
+-------
+    11
+(1 row)
+
+phase2=# select count(*) from League;
+ count 
+-------
+    11
+(1 row)
+
+phase2=# select count(*) from Match;
+ count 
+-------
+ 25979
+(1 row)
+
+phase2=# select count(*) from Player;
+ count 
+-------
+ 11060
+(1 row)
+
+phase2=# select count(*) from PlayerAttributes;
+ count  
+--------
+ 183117
+(1 row)
+
+phase2=# select count(*) from Team;
+ count 
+-------
+   299
+(1 row)
+
+phase2=# select count(*) from TeamAttributes;
+ count 
+-------
+  1457
+(1 row)
+
+PART (D)
+
+phase2=# select * from Country LIMIT 3;
+ country_id |  name   
+------------+---------
+          1 | Belgium
+       1729 | England
+       4769 | France
+(3 rows)
+
+phase2=# select * from League LIMIT 3;
+ league_id | country_id |          name          
+-----------+------------+------------------------
+         1 |          1 | Belgium Jupiler League
+      1729 |       1729 | England Premier League
+      4769 |       4769 | France Ligue 1
+(3 rows)
+
+phase2=# select * from Match LIMIT 3;
+ match_id | country_id | league_id |  season   |        date         | home_team_id | away_team_id | home_team_goal | away_team_goal | shot_on | shot_off | foul_commit | card | crosses | corner | possession 
+----------+------------+-----------+-----------+---------------------+--------------+--------------+----------------+----------------+---------+----------+-------------+------+---------+--------+------------
+        1 |          1 |         1 | 2008/2009 | 2008-08-17 00:00:00 |         9987 |         9993 |              1 |              1 |         |          |             |      |         |        | 
+        2 |          1 |         1 | 2008/2009 | 2008-08-16 00:00:00 |        10000 |         9994 |              0 |              0 |         |          |             |      |         |        | 
+        3 |          1 |         1 | 2008/2009 | 2008-08-16 00:00:00 |         9984 |         8635 |              0 |              3 |         |          |             |      |         |        | 
+(3 rows)
+
+phase2=# select * from Player LIMIT 3;
+ player_id |        name        |      birthday       | height | weight 
+-----------+--------------------+---------------------+--------+--------
+    505942 | Aaron Appindangoye | 1992-02-29 00:00:00 | 182.88 |    187
+    155782 | Aaron Cresswell    | 1989-12-15 00:00:00 | 170.18 |    146
+    162549 | Aaron Doran        | 1991-05-13 00:00:00 | 170.18 |    163
+(3 rows)
+
+phase2=# select * from PlayerAttributes LIMIT 3;
+ player_id |        date         | rating | potential | attacking_work_rate | defensive_work_rate 
+-----------+---------------------+--------+-----------+---------------------+---------------------
+    505942 | 2016-02-18 00:00:00 |     67 |        71 | medium              | medium
+    505942 | 2015-11-19 00:00:00 |     67 |        71 | medium              | medium
+    505942 | 2015-09-21 00:00:00 |     62 |        66 | medium              | medium
+(3 rows)
+
+phase2=# select * from Team LIMIT 3;
+ team_id |    team_name     | team_abbreviation 
+---------+------------------+-------------------
+    9987 | KRC Genk         | GEN
+    9993 | Beerschot AC     | BAC
+   10000 | SV Zulte-Waregem | ZUL
+(3 rows)
+
+phase2=# select * from TeamAttributes LIMIT 3;
+ team_id |        date         | build_up_play_speed | build_up_play_dribbling | build_up_play_passing | chance_creation_passing | chance_creation_crossing | chance_creation_shooting | defence_pressure | defence_aggression | defence_team_width 
+---------+---------------------+---------------------+-------------------------+-----------------------+-------------------------+--------------------------+--------------------------+------------------+--------------------+--------------------
+    9930 | 2010-02-22 00:00:00 |                  60 |                         |                    50 |                      60 |                       65 |                       55 |               50 |                 55 |                 45
+    9930 | 2014-09-19 00:00:00 |                  52 |                      48 |                    56 |                      54 |                       63 |                       64 |               47 |                 44 |                 54
+    9930 | 2015-09-10 00:00:00 |                  47 |                      41 |                    54 |                      54 |                       63 |                       64 |               47 |                 44 |                 54
+(3 rows)
+
+
